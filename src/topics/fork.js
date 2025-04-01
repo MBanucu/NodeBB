@@ -7,6 +7,8 @@ const categories = require('../categories');
 const privileges = require('../privileges');
 const plugins = require('../plugins');
 const meta = require('../meta');
+const activitypub = require('../activitypub');
+const utils = require('../utils');
 
 module.exports = function (Topics) {
 	Topics.createTopicFromPosts = async function (uid, title, pids, fromTid, cid) {
@@ -38,25 +40,29 @@ module.exports = function (Topics) {
 			cid = await posts.getCidByPid(mainPid);
 		}
 
-		const [postData, isAdminOrMod] = await Promise.all([
+		const [mainPost, isAdminOrMod] = await Promise.all([
 			posts.getPostData(mainPid),
 			privileges.categories.isAdminOrMod(cid, uid),
 		]);
+		let lastPost = mainPost;
+		if (pids.length > 1) {
+			lastPost = await posts.getPostData(pids[pids.length - 1]);
+		}
 
 		if (!isAdminOrMod) {
 			throw new Error('[[error:no-privileges]]');
 		}
-
-		const scheduled = postData.timestamp > Date.now();
+		const now = Date.now();
+		const scheduled = mainPost.timestamp > now;
 		const params = {
-			uid: postData.uid,
+			uid: mainPost.uid,
 			title: title,
 			cid: cid,
-			timestamp: scheduled && postData.timestamp,
+			timestamp: mainPost.timestamp,
 		};
 		const result = await plugins.hooks.fire('filter:topic.fork', {
 			params: params,
-			tid: postData.tid,
+			tid: mainPost.tid,
 		});
 
 		const tid = await Topics.create(result.params);
@@ -71,21 +77,27 @@ module.exports = function (Topics) {
 			await Topics.movePostToTopic(uid, pid, tid, scheduled);
 		}
 
-		await Topics.updateLastPostTime(tid, scheduled ? (postData.timestamp + 1) : Date.now());
+		await Topics.updateLastPostTime(tid, scheduled ? (mainPost.timestamp + 1) : lastPost.timestamp);
 
 		await Promise.all([
 			Topics.setTopicFields(tid, {
-				upvotes: postData.upvotes,
-				downvotes: postData.downvotes,
+				upvotes: mainPost.upvotes,
+				downvotes: mainPost.downvotes,
 				forkedFromTid: fromTid,
 				forkerUid: uid,
-				forkTimestamp: Date.now(),
+				forkTimestamp: now,
 			}),
-			db.sortedSetsAdd(['topics:votes', `cid:${cid}:tids:votes`], postData.votes, tid),
+			db.sortedSetsAdd(['topics:votes', `cid:${cid}:tids:votes`], mainPost.votes, tid),
 			Topics.events.log(fromTid, { type: 'fork', uid, href: `/topic/${tid}` }),
 		]);
 
-		plugins.hooks.fire('action:topic.fork', { tid: tid, fromTid: fromTid, uid: uid });
+		// ideally we should federate a "move" activity instead, then can capture remote posts too. tbd
+		if (utils.isNumber(pids[0])) {
+			const { activity } = await activitypub.mocks.activities.create(pids[0], uid);
+			await activitypub.feps.announce(pids[0], activity);
+		}
+
+		plugins.hooks.fire('action:topic.fork', { tid, fromTid, uid });
 
 		return await Topics.getTopicData(tid);
 	};
