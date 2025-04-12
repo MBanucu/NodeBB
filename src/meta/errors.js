@@ -11,9 +11,13 @@ const Errors = module.exports;
 
 let counters = {};
 
-new cronJob('0 * * * * *', (() => {
+const job = new cronJob('0 * * * * *', (() => {
 	Errors.writeData();
 }), null, true);
+
+Errors.stop = function () {
+	job.stop();
+};
 
 Errors.writeData = async function () {
 	try {
