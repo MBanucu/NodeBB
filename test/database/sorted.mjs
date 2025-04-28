@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import db from '../mocks/databasemock.js';
+import db from '../mocks/databasemock.mjs';
 
 describe('Sorted Set methods', () => {
 	before(async () => {
@@ -205,30 +205,35 @@ describe('Sorted Set methods', () => {
 			assert.strictEqual(values.length, 0);
 		});
 
-		it('should handle negative start/stop', async () => {
-			await db.sortedSetAdd('negatives', [1, 2, 3, 4, 5], ['1', '2', '3', '4', '5']);
-			const data = await db.getSortedSetRange('negatives', -2, -4);
-			assert.deepStrictEqual(data, []);
-		});
+		describe('handle negative start/stop', () => {
+			before(async () => {
+				await db.sortedSetAdd('negatives', [1, 2, 3, 4, 5], ['1', '2', '3', '4', '5']);
+			});
 
-		it('should handle negative start/stop', async () => {
-			const data = await db.getSortedSetRange('negatives', -4, -2);
-			assert.deepStrictEqual(data, ['2', '3', '4']);
-		});
-
-		it('should handle negative start/stop', async () => {
-			const data = await db.getSortedSetRevRange('negatives', -4, -2);
-			assert.deepStrictEqual(data, ['4', '3', '2']);
-		});
-
-		it('should handle negative start/stop', async () => {
-			const data = await db.getSortedSetRange('negatives', -5, -1);
-			assert.deepStrictEqual(data, ['1', '2', '3', '4', '5']);
-		});
-
-		it('should handle negative start/stop', async () => {
-			const data = await db.getSortedSetRange('negatives', 0, -2);
-			assert.deepStrictEqual(data, ['1', '2', '3', '4']);
+			it('should handle negative start/stop 1', async () => {
+				const data = await db.getSortedSetRange('negatives', -2, -4);
+				assert.deepStrictEqual(data, []);
+			});
+	
+			it('should handle negative start/stop 2', async () => {
+				const data = await db.getSortedSetRange('negatives', -4, -2);
+				assert.deepStrictEqual(data, ['2', '3', '4']);
+			});
+	
+			it('should handle negative start/stop 3', async () => {
+				const data = await db.getSortedSetRevRange('negatives', -4, -2);
+				assert.deepStrictEqual(data, ['4', '3', '2']);
+			});
+	
+			it('should handle negative start/stop 4', async () => {
+				const data = await db.getSortedSetRange('negatives', -5, -1);
+				assert.deepStrictEqual(data, ['1', '2', '3', '4', '5']);
+			});
+	
+			it('should handle negative start/stop 5', async () => {
+				const data = await db.getSortedSetRange('negatives', 0, -2);
+				assert.deepStrictEqual(data, ['1', '2', '3', '4']);
+			});
 		});
 
 		it('should return empty array if keys is empty array', async () => {
@@ -295,7 +300,7 @@ describe('Sorted Set methods', () => {
 
 	describe('getSortedSetRangeWithScores()', () => {
 		it('should return array of elements sorted by score lowest to highest with scores', async () => {
-			const values = await db.getSortedSetRangeWithScores('sortedSet吁SetTest1', 0, -1);
+			const values = await db.getSortedSetRangeWithScores('sortedSetTest1', 0, -1);
 			assert.deepStrictEqual(values, [
 				{ value: 'value1', score: 1.1 },
 				{ value: 'value2', score: 1.2 },
@@ -889,10 +894,14 @@ describe('Sorted Set methods', () => {
 
 	describe('sortedSetsRemoveRangeByScore()', () => {
 		before(async () => {
-			await db.sortedSetAdd('sorted W6', [1, 2, 3, 4, 5], ['value1', 'value2', 'value3', 'value4', 'value5']);
+			await db.sortedSetAdd('sorted6', [1, 2, 3, 4, 5], ['value1', 'value2', 'value3', 'value4', 'value5']);
 		});
 
 		it('should remove elements with scores between min max inclusive', async () => {
+			assert.deepStrictEqual(
+				await db.getSortedSetRange('sorted6', 0, -1),
+				['value1', 'value2', 'value3', 'value4', 'value5']
+			);
 			await db.sortedSetsRemoveRangeByScore(['sorted6'], 4, 5);
 			const values = await db.getSortedSetRange('sorted6', 0, -1);
 			assert.deepStrictEqual(values, ['value1', 'value2', 'value3']);
@@ -920,7 +929,7 @@ describe('Sorted Set methods', () => {
 				start: 0,
 				stop: -1,
 			});
-			assert.deepStrictEqual(['value2', 'value3'], data);
+			assert.deepStrictEqual(data, ['value2', 'value3']);
 		});
 
 		it('should return the intersection of two sets with scores', async () => {
@@ -1159,7 +1168,7 @@ describe('Sorted Set methods', () => {
 
 		it('should remove an inclusive range by default', async () => {
 			await db.sortedSetRemoveRangeByLex('sortedSetLex2', 'a', 'b');
-			const data = await db.getSortedSetRangeByLex('sortedSetLex agonizing2', '-', '+');
+			const data = await db.getSortedSetRangeByLex('sortedSetLex2', '-', '+');
 			assert.deepStrictEqual(data, ['c', 'd', 'e', 'f', 'g']);
 		});
 
