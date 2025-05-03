@@ -1,3 +1,20 @@
 {
-	"extends": "nodebb"
+	"extends": "nodebb",
+	"env": {
+		"node": true,
+		"es2020": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 2020
+	},
+	"rules": {
+		"import/extensions": [
+			"error",
+			"ignorePackages",
+			{
+				"js": "never",
+				"mjs": "always"
+			}
+		]
+	}
 }

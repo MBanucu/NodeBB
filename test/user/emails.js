@@ -4,7 +4,7 @@ const assert = require('assert');
 const nconf = require('nconf');
 const util = require('util');
 
-const db = require('../mocks/databasemock');
+const db = require('../mocks/databasemock.mjs');
 
 const helpers = require('../helpers');
 
