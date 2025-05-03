@@ -1,19 +1,17 @@
-'use strict';
+// ESM version of the test file
+import assert from 'assert';
+import nconf from 'nconf';
+import { db } from '../mocks/databasemock.js';
+import * as meta from '../../src/meta.js';
+import * as categories from '../../src/categories.js';
+import * as user from '../../src/user.js';
+import * as topics from '../../src/topics.js';
+import * as activitypub from '../../src/activitypub.js';
+import * as utils from '../../src/utils.js';
+import * as request from '../../src/request.js';
+import * as slugify from '../../src/slugify.js';
 
-const assert = require('assert');
-const nconf = require('nconf');
-
-const db = require('../mocks/databasemock');
-const meta = require('../../src/meta');
-const categories = require('../../src/categories');
-const user = require('../../src/user');
-const topics = require('../../src/topics');
-const activitypub = require('../../src/activitypub');
-const utils = require('../../src/utils');
-const request = require('../../src/request');
-const slugify = require('../../src/slugify');
-
-describe('Actor asserton', () => {
+describe('Actor assertion', () => {
 	describe('happy path', () => {
 		let uid;
 		let actorUri;
@@ -96,7 +94,7 @@ describe('Controllers', () => {
 		let slug;
 
 		beforeEach(async () => {
-			slug = slugify(utils.generateUUID().slice(0, 8));
+			slug = slugify.default(utils.generateUUID().slice(0, 8));
 			uid = await user.create({ username: slug });
 		});
 
@@ -139,7 +137,7 @@ describe('Controllers', () => {
 		let description;
 
 		beforeEach(async () => {
-			slug = slugify(utils.generateUUID().slice(0, 8));
+			slug = slugify.default(utils.generateUUID().slice(0, 8));
 			description = utils.generateUUID();
 			({ cid } = await categories.create({
 				name: slug,
@@ -185,7 +183,7 @@ describe('Controllers', () => {
 			assert(['id', 'owner', 'publicKeyPem'].every(prop => body.publicKey.hasOwnProperty(prop)));
 		});
 
-		it('should serve the the backgroundImage in `icon` if set', async () => {
+		it('should serve the backgroundImage in `icon` if set', async () => {
 			const payload = {};
 			payload[cid] = {
 				backgroundImage: `/assets/uploads/files/test.png`,
@@ -259,7 +257,7 @@ describe('Controllers', () => {
 
 		before(async () => {
 			({ cid } = await categories.create({ name: utils.generateUUID().slice(0, 8) }));
-			const slug = slugify(utils.generateUUID().slice(0, 8));
+			const slug = slugify.default(utils.generateUUID().slice(0, 8));
 			uid = await user.create({ username: slug });
 		});
 
@@ -330,7 +328,7 @@ describe('Controllers', () => {
 
 		before(async () => {
 			({ cid } = await categories.create({ name: utils.generateUUID().slice(0, 8) }));
-			const slug = slugify(utils.generateUUID().slice(0, 8));
+			const slug = slugify.default(utils.generateUUID().slice(0, 8));
 			uid = await user.create({ username: slug });
 		});
 
