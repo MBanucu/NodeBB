@@ -1,10 +1,8 @@
-'use strict';
+import * as activitypub from '../../src/activitypub/index.js';
+import * as utils from '../../src/utils.js';
+import slugify from '../../src/slugify.js';
 
-const activitypub = require('../../src/activitypub');
-const utils = require('../../src/utils');
-const slugify = require('../../src/slugify');
-
-const Helpers = module.exports;
+const Helpers = {};
 
 Helpers.mocks = {};
 
@@ -22,11 +20,9 @@ Helpers.mocks.actor = () => {
 		url: `${id}`,
 		inbox: `${id}/inbox`,
 		outbox: `${id}/outbox`,
-
 		type: 'Person',
 		name: slugify(uuid),
 		preferredUsername: uuid,
-
 		publicKey: {
 			id: `${id}#key`,
 			owner: `${id}`,
@@ -88,3 +84,5 @@ Helpers.mocks.create = (object) => {
 
 	return { id, activity };
 };
+
+export default Helpers;
