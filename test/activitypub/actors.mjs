@@ -10,7 +10,7 @@ import utils from '../../src/utils.js';
 import request from '../../src/request.js';
 import slugify from '../../src/slugify.js';
 
-describe('ActivityPub/actors', () => {
+describe('ActivityPub/Actors', () => {
 	describe('Actor assertion', () => {
 		describe('happy path', () => {
 			let uid;
