@@ -4,7 +4,7 @@ const nconf = require('nconf');
 const assert = require('assert');
 const async = require('async');
 
-const db = require('../mocks/databasemock.mjs');
+const db = require('../../src/database');
 
 const user = require('../../src/user');
 const groups = require('../../src/groups');
@@ -14,7 +14,7 @@ const socketUser = require('../../src/socket.io/user');
 const adminUser = require('../../src/socket.io/admin/user');
 
 
-describe('custom user fields', () => {
+describe('User/custom user fields', () => {
 	let adminUid;
 	let lowRepUid;
 	let highRepUid;
